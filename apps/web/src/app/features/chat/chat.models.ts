@@ -1,4 +1,4 @@
-import { CatalogModel, CatalogProvider } from '../catalog/catalog.models';
+import { CatalogAgent, CatalogModel, CatalogProvider } from '../catalog/catalog.models';
 
 export interface ChatExecution {
   id: string;
@@ -9,12 +9,17 @@ export interface ChatExecution {
   startedAt: string;
   finishedAt: string;
   status: 'success' | 'error';
+  sessionId?: string;
+  agentId?: string;
+  agent?: string;
+  routingPolicyId?: string;
   prompt?: string;
   output?: string;
   error?: string;
 }
 
 export interface ChatExecutionResponse {
+  session?: ChatSession | { id: string } | null;
   execution: ChatExecution;
   result: {
     output: string;
@@ -28,6 +33,21 @@ export interface ChatExecutionResponse {
 }
 
 export interface ChatCatalog {
+  agents: ChatAgent[];
   providers: CatalogProvider[];
   models: CatalogModel[];
+}
+
+export interface ChatAgent extends CatalogAgent {}
+
+export interface ChatSession {
+  id: string;
+  title?: string;
+  agentId?: string;
+  messages: Array<{
+    role: 'system' | 'user' | 'assistant';
+    content: string;
+  }>;
+  createdAt: string;
+  updatedAt: string;
 }

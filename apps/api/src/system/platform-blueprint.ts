@@ -36,7 +36,7 @@ export const platformBlueprint = {
     'soporte local y remoto',
   ],
   runtime: {
-    endpoints: ['GET /api/chat/executions', 'POST /api/chat/execute'],
+    endpoints: ['GET /api/chat/executions', 'GET /api/chat/sessions', 'POST /api/chat/sessions', 'POST /api/chat/execute', 'POST /api/chat/stream'],
     adapters: ['ollama', 'openai-compatible'],
   },
 };

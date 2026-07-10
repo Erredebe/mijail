@@ -21,6 +21,17 @@ enum ModelCapability {
   EMBEDDINGS
 }
 
+enum AgentStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ExecutionStatus {
+  SUCCESS
+  ERROR
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
@@ -64,6 +75,7 @@ model ProviderConnection {
   updatedAt     DateTime          @updatedAt
   models        ModelDefinition[]
   routingPolicy RoutingPolicy[]
+  executions    Execution[]
 }
 
 model ModelDefinition {
@@ -81,6 +93,7 @@ model ModelDefinition {
   providerConnection   ProviderConnection   @relation(fields: [providerConnectionId], references: [id], onDelete: Cascade)
   primaryPolicies      RoutingPolicy[]      @relation("PrimaryModel")
   fallbackPolicies     RoutingPolicy[]      @relation("FallbackModel")
+  executions           Execution[]
 
   @@unique([providerConnectionId, externalModelId])
 }
@@ -98,4 +111,111 @@ model RoutingPolicy {
   provider        ProviderConnection @relation(fields: [providerId], references: [id], onDelete: Cascade)
   primaryModel    ModelDefinition    @relation("PrimaryModel", fields: [primaryModelId], references: [id], onDelete: Restrict)
   fallbackModel   ModelDefinition?   @relation("FallbackModel", fields: [fallbackModelId], references: [id], onDelete: SetNull)
+  agents          Agent[]
+  executions      Execution[]
+}
+
+model Agent {
+  id              String         @id @default(cuid())
+  name            String
+  slug            String         @unique
+  description     String?
+  instructions    String?
+  status          AgentStatus    @default(DRAFT)
+  isEnabled       Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  routingPolicyId String?
+  routingPolicy   RoutingPolicy? @relation(fields: [routingPolicyId], references: [id], onDelete: SetNull)
+  skills          AgentSkill[]
+  tools           AgentTool[]
+  sessions        ChatSession[]
+  executions      Execution[]
+}
+
+model Skill {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String?
+  instructions String?
+  isEnabled    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  agents       AgentSkill[]
+}
+
+model AgentSkill {
+  agentId    String
+  skillId    String
+  assignedAt DateTime @default(now())
+  agent      Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([agentId, skillId])
+}
+
+model Tool {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String?
+  kind         String
+  endpoint     String?
+  method       String?
+  isEnabled    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  agents       AgentTool[]
+}
+
+model AgentTool {
+  agentId    String
+  toolId     String
+  assignedAt DateTime @default(now())
+  agent      Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  tool       Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@id([agentId, toolId])
+}
+
+model ChatSession {
+  id         String        @id @default(cuid())
+  title      String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  agentId    String?
+  agent      Agent?        @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  messages   ChatMessage[]
+  executions Execution[]
+}
+
+model ChatMessage {
+  id        String      @id @default(cuid())
+  role      String
+  content   String
+  createdAt DateTime    @default(now())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model Execution {
+  id              String           @id @default(cuid())
+  status          ExecutionStatus
+  prompt          String?
+  output          String?
+  error           String?
+  startedAt       DateTime
+  finishedAt      DateTime
+  createdAt       DateTime         @default(now())
+  providerId      String
+  modelId         String
+  sessionId       String?
+  agentId         String?
+  routingPolicyId String?
+  provider        ProviderConnection @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  model           ModelDefinition    @relation(fields: [modelId], references: [id], onDelete: Restrict)
+  session         ChatSession?       @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  agent           Agent?             @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  routingPolicy   RoutingPolicy?     @relation(fields: [routingPolicyId], references: [id], onDelete: SetNull)
 }

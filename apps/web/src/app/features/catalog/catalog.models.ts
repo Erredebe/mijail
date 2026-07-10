@@ -44,3 +44,41 @@ export interface RoutingPolicy {
   primaryModel?: Pick<CatalogModel, 'id' | 'name' | 'slug' | 'externalModelId'>;
   fallbackModel?: Pick<CatalogModel, 'id' | 'name' | 'slug' | 'externalModelId'> | null;
 }
+
+export interface CatalogAgent {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  instructions?: string;
+  status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
+  isEnabled: boolean;
+  routingPolicyId?: string | null;
+  routingPolicy?: Pick<RoutingPolicy, 'id' | 'name' | 'providerId' | 'primaryModelId'> | null;
+  skills?: Array<{
+    skill: CatalogSkill;
+  }>;
+  tools?: Array<{
+    tool: CatalogTool;
+  }>;
+}
+
+export interface CatalogSkill {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  instructions?: string;
+  isEnabled: boolean;
+}
+
+export interface CatalogTool {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  kind: string;
+  endpoint?: string | null;
+  method?: string | null;
+  isEnabled: boolean;
+}

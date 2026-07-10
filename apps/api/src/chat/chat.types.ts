@@ -26,6 +26,12 @@ export type ChatExecutionResult = {
   raw?: unknown;
 };
 
+export type ChatStreamChunk = {
+  type: 'chunk' | 'done' | 'error';
+  content?: string;
+  error?: string;
+};
+
 export type ExecutionRecord = {
   id: string;
   providerId: string;
@@ -35,7 +41,20 @@ export type ExecutionRecord = {
   startedAt: string;
   finishedAt: string;
   status: 'success' | 'error';
+  sessionId?: string;
+  agentId?: string;
+  agent?: string;
+  routingPolicyId?: string;
   prompt?: string;
   output?: string;
   error?: string;
+};
+
+export type ChatSessionRecord = {
+  id: string;
+  title?: string;
+  agentId?: string;
+  messages: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
 };

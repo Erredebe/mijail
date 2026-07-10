@@ -70,6 +70,16 @@
   gap: 14px;
 }
 
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toggle-row input {
+  width: auto;
+}
+
 label {
   display: grid;
   gap: 8px;
@@ -129,9 +139,43 @@ button {
   color: #c4ccf5;
 }
 
+.execution-agent {
+  color: #9ca7d8;
+  margin-top: 10px;
+}
+
 .execution-output {
   min-height: auto;
   margin: 0;
+}
+
+.conversation-panel {
+  margin-top: 16px;
+}
+
+.message-list {
+  display: grid;
+  gap: 10px;
+}
+
+.message-card {
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.message-card.user {
+  border-color: rgba(87, 110, 255, 0.3);
+}
+
+.message-card.assistant {
+  border-color: rgba(0, 212, 170, 0.25);
+}
+
+.message-card p {
+  margin-bottom: 0;
+  white-space: pre-wrap;
 }
 
 @media (max-width: 900px) {

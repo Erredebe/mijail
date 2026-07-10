@@ -179,9 +179,18 @@ Actualmente el proyecto incluye:
 
 - dashboard inicial
 - catalogo de providers y modelos
+- gestion inicial de agents desde UI
 - formularios para providers, modelos y routing policies
+- CRUD visual base de agents con alta, edicion y borrado
+- modulo inicial de skills
+- relacion many-to-many entre agents y skills
+- modulo inicial de tools
+- relacion many-to-many entre agents y tools
 - auth base con JWT y RBAC
 - chat operativo contra `Ollama` y APIs compatibles con `OpenAI`
+- sesiones de chat reutilizables
+- resolucion de provider/model por agent y routing policy
+- streaming real en chat
 - historial de ejecuciones en memoria
 
 ## Endpoints principales
@@ -195,10 +204,48 @@ Actualmente el proyecto incluye:
 - `POST /api/providers`
 - `GET /api/models`
 - `POST /api/models`
+- `GET /api/agents`
+- `POST /api/agents`
+- `PATCH /api/agents/:id`
+- `DELETE /api/agents/:id`
+- `GET /api/skills`
+- `POST /api/skills`
+- `PATCH /api/skills/:id`
+- `DELETE /api/skills/:id`
+- `GET /api/tools`
+- `POST /api/tools`
+- `PATCH /api/tools/:id`
+- `DELETE /api/tools/:id`
+- `POST /api/tools/:id/execute`
 - `GET /api/routing-policies`
 - `POST /api/routing-policies`
 - `GET /api/chat/executions`
+- `GET /api/chat/sessions`
+- `POST /api/chat/sessions`
 - `POST /api/chat/execute`
+- `POST /api/chat/stream`
+
+## Streaming y multi-turno
+
+El chat soporta dos modos:
+
+1. ejecucion normal por `POST /api/chat/execute`
+2. streaming real por `POST /api/chat/stream`
+
+Cuando se usa una `session`, el backend reutiliza el historial completo de mensajes como contexto multi-turno.
+
+Si eliges un `agent` con `routingPolicy`, el frontend resuelve automaticamente `provider` y `model`.
+
+## Agents, skills y tools
+
+Desde `http://localhost:4200/catalog` ya puedes:
+
+1. crear, editar y borrar `agents`
+2. asignar multiples `skills` a un `agent`
+3. asignar multiples `tools` a un `agent`
+4. crear, editar y borrar `skills`
+5. crear y editar `tools` iniciales para el catalogo de capacidades
+6. ejecutar `tools` HTTP de prueba desde el catalogo
 
 ## Estado actual de git
 

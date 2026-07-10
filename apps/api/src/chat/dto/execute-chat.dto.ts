@@ -11,11 +11,25 @@ class ChatMessageDto {
 }
 
 export class ExecuteChatDto {
+  @IsOptional()
   @IsString()
-  providerId!: string;
+  agentId?: string;
 
+  @IsOptional()
   @IsString()
-  modelId!: string;
+  sessionId?: string;
+
+  @IsOptional()
+  @IsString()
+  routingPolicyId?: string;
+
+  @IsOptional()
+  @IsString()
+  providerId?: string;
+
+  @IsOptional()
+  @IsString()
+  modelId?: string;
 
   @IsOptional()
   @IsString()

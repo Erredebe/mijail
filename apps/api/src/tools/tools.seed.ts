@@ -1,0 +1,26 @@
+export const toolsSeed = [
+  {
+    id: 'seed-tool-status-api',
+    name: 'Status API',
+    slug: 'status-api',
+    description: 'Tool HTTP para consultar estado de servicios.',
+    kind: 'http',
+    endpoint: 'https://status.example.com/api/health',
+    method: 'GET',
+    isEnabled: true,
+    createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+  },
+  {
+    id: 'seed-tool-local-shell',
+    name: 'Local Shell Tool',
+    slug: 'local-shell-tool',
+    description: 'Tool conceptual para ejecucion local controlada.',
+    kind: 'shell',
+    endpoint: null,
+    method: null,
+    isEnabled: true,
+    createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+  },
+];

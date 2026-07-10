@@ -74,6 +74,9 @@ El backend expone actualmente un endpoint `GET /api/system/blueprint` para descr
 - `ModelsModule` con CRUD base y fallback demo sin BD
 - `RoutingPoliciesModule` con CRUD base y fallback demo sin BD
 - `ChatModule` con ejecucion real y trazas en memoria
+- `AgentsModule` con fallback demo, sesiones y resolucion por routing policy
+- `SkillsModule` como primer modulo de capacidades reutilizables
+- `ToolsModule` como catalogo inicial de herramientas operativas
 
 ## Runtime actual
 
@@ -83,6 +86,15 @@ La primera capa de ejecucion implementada usa adaptadores backend:
 - `OpenAiCompatibleAdapter`
 
 Ambos consumen un contrato comun y permiten probar la ejecucion sin acoplar el frontend a un proveedor concreto.
+
+La iteracion actual añade:
+
+- `streaming` sobre HTTP con eventos SSE
+- sesiones multi-turno reutilizando historial
+- resolucion de `provider/model` a partir de `agent -> routing policy`
+- relacion `agents <-> skills` many-to-many
+- relacion `agents <-> tools` many-to-many
+- runtime inicial de `tools` HTTP via `POST /api/tools/:id/execute`
 
 ## Siguientes pasos recomendados
 

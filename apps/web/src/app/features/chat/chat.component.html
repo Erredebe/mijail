@@ -18,6 +18,26 @@
 
       <form [formGroup]="form" (ngSubmit)="submit()" class="chat-form">
         <label>
+          <span>Agente</span>
+          <select formControlName="agentId" (change)="onAgentChange($any($event.target).value)">
+            <option value="">Sin agente</option>
+            @for (agent of agents(); track agent.id) {
+              <option [value]="agent.id">{{ agent.name }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Sesion</span>
+          <select formControlName="sessionId" (change)="onSessionChange($any($event.target).value)">
+            <option value="">Nueva sesion</option>
+            @for (session of sessions(); track session.id) {
+              <option [value]="session.id">{{ session.title || session.id }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
           <span>Provider</span>
           <select formControlName="providerId" (change)="onProviderChange($any($event.target).value)">
             @for (provider of providers(); track provider.id) {
@@ -55,6 +75,11 @@
           <textarea formControlName="prompt" rows="7" placeholder="Escribe la consulta para el modelo"></textarea>
         </label>
 
+        <label class="toggle-row">
+          <input type="checkbox" [checked]="useStreaming()" (change)="useStreaming.set($any($event.target).checked)" />
+          <span>Usar streaming real</span>
+        </label>
+
         <button type="submit" [disabled]="isExecuting()">{{ isExecuting() ? 'Ejecutando...' : 'Ejecutar' }}</button>
       </form>
     </article>
@@ -67,6 +92,21 @@
       }
 
       <pre class="response-box">{{ responseText() || 'Aun no hay respuesta.' }}</pre>
+
+      @if (selectedSession(); as session) {
+        <div class="conversation-panel">
+          <h3>Contexto de la sesion</h3>
+
+          <div class="message-list">
+            @for (message of session.messages; track $index) {
+              <article class="message-card" [class.user]="message.role === 'user'" [class.assistant]="message.role === 'assistant'">
+                <strong>{{ message.role }}</strong>
+                <p>{{ message.content }}</p>
+              </article>
+            }
+          </div>
+        </div>
+      }
     </article>
   </section>
 
@@ -83,6 +123,10 @@
             <strong>{{ execution.provider }} · {{ execution.model }}</strong>
             <span class="execution-status" [class.error]="execution.status === 'error'">{{ execution.status }}</span>
           </div>
+
+          @if (execution.agent) {
+            <p class="execution-agent">Agente: {{ execution.agent }}</p>
+          }
 
           <p class="execution-prompt">{{ execution.prompt || 'Sin prompt' }}</p>
 
