@@ -1,0 +1,100 @@
+<main class="chat-shell">
+  <section class="chat-header">
+    <div>
+      <div class="eyebrow">Runtime Chat</div>
+      <h1>Prueba providers y modelos reales</h1>
+      <p>Ejecuta prompts contra `Ollama` o un endpoint compatible con `OpenAI`.</p>
+    </div>
+
+    <div class="header-links">
+      <a routerLink="/" class="nav-link">Dashboard</a>
+      <a routerLink="/catalog" class="nav-link">Catalogo</a>
+    </div>
+  </section>
+
+  <section class="chat-grid">
+    <article class="panel">
+      <h2>Ejecutar chat</h2>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="chat-form">
+        <label>
+          <span>Provider</span>
+          <select formControlName="providerId" (change)="onProviderChange($any($event.target).value)">
+            @for (provider of providers(); track provider.id) {
+              <option [value]="provider.id">{{ provider.name }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Modelo</span>
+          <select formControlName="modelId">
+            @for (model of filteredModels(form.get('providerId')?.value || ''); track model.id) {
+              <option [value]="model.id">{{ model.name }} · {{ model.externalModelId }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Base URL</span>
+          <input formControlName="baseUrl" placeholder="http://localhost:11434 o https://api.openai.com/v1" />
+        </label>
+
+        <label>
+          <span>API key opcional</span>
+          <input formControlName="apiKey" type="password" placeholder="Solo necesaria para endpoints remotos" />
+        </label>
+
+        <label>
+          <span>System prompt</span>
+          <textarea formControlName="systemPrompt" rows="4"></textarea>
+        </label>
+
+        <label>
+          <span>Prompt</span>
+          <textarea formControlName="prompt" rows="7" placeholder="Escribe la consulta para el modelo"></textarea>
+        </label>
+
+        <button type="submit" [disabled]="isExecuting()">{{ isExecuting() ? 'Ejecutando...' : 'Ejecutar' }}</button>
+      </form>
+    </article>
+
+    <article class="panel response-panel">
+      <h2>Respuesta</h2>
+
+      @if (errorText()) {
+        <div class="error-box">{{ errorText() }}</div>
+      }
+
+      <pre class="response-box">{{ responseText() || 'Aun no hay respuesta.' }}</pre>
+    </article>
+  </section>
+
+  <section class="panel executions-panel">
+    <div class="executions-header">
+      <h2>Historial de ejecuciones</h2>
+      <button type="button" class="nav-link button-link" (click)="reload()">Recargar</button>
+    </div>
+
+    <div class="execution-list">
+      @for (execution of executions(); track execution.id) {
+        <article class="execution-card">
+          <div class="execution-topline">
+            <strong>{{ execution.provider }} · {{ execution.model }}</strong>
+            <span class="execution-status" [class.error]="execution.status === 'error'">{{ execution.status }}</span>
+          </div>
+
+          <p class="execution-prompt">{{ execution.prompt || 'Sin prompt' }}</p>
+
+          @if (execution.output) {
+            <pre class="execution-output">{{ execution.output }}</pre>
+          }
+
+          @if (execution.error) {
+            <div class="error-box small">{{ execution.error }}</div>
+          }
+        </article>
+      }
+    </div>
+  </section>
+</main>

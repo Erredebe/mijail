@@ -1,0 +1,66 @@
+<main class="shell">
+  <section class="hero">
+    <div class="eyebrow">Agentic Platform</div>
+    <h1>Centro de gestion para agentes, modelos, tools, MCPs y chat</h1>
+    <p>
+      Base inicial para una plataforma multiagente con soporte para proveedores remotos,
+      modelos locales, control por roles y panel operativo.
+    </p>
+    <div class="hero-actions">
+      <a routerLink="/catalog" class="action-link">Ver catalogo de providers</a>
+      <a routerLink="/chat" class="action-link secondary">Abrir chat operativo</a>
+    </div>
+  </section>
+
+  <section class="stats-grid">
+    @for (stat of stats; track stat.label) {
+      <article class="card stat-card">
+        <span class="stat-value">{{ stat.value }}</span>
+        <span class="stat-label">{{ stat.label }}</span>
+      </article>
+    }
+  </section>
+
+  <section class="content-grid">
+    @for (section of sections; track section.title) {
+      <article class="card">
+        <h2>{{ section.title }}</h2>
+        <ul>
+          @for (item of section.items; track item) {
+            <li>{{ item }}</li>
+          }
+        </ul>
+      </article>
+    }
+
+    <article class="card">
+      <h2>Roles</h2>
+      <div class="pill-row">
+        @for (role of roles; track role) {
+          <span class="pill">{{ role }}</span>
+        }
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>Compatibilidad de modelos</h2>
+      <div class="provider-block">
+        <h3>Remoto</h3>
+        <div class="pill-row">
+          @for (provider of providers.remote; track provider) {
+            <span class="pill alt">{{ provider }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="provider-block">
+        <h3>Local</h3>
+        <div class="pill-row">
+          @for (provider of providers.local; track provider) {
+            <span class="pill">{{ provider }}</span>
+          }
+        </div>
+      </div>
+    </article>
+  </section>
+</main>

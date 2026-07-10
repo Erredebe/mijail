@@ -1,0 +1,42 @@
+export const platformBlueprint = {
+  product: {
+    name: 'Agentic Platform',
+    status: 'foundation',
+    frontend: 'Angular 19',
+    backend: 'NestJS 11',
+  },
+  roles: ['admin', 'builder', 'operator', 'viewer'],
+  modules: [
+    'auth',
+    'users',
+    'roles',
+    'agents',
+    'skills',
+    'mcps',
+    'tools',
+    'prompts',
+    'chat',
+    'providers',
+    'models',
+    'routing-policies',
+    'executions',
+    'dashboard',
+    'audit',
+  ],
+  providerSupport: {
+    remote: ['openai', 'anthropic', 'openrouter', 'google', 'azure-openai'],
+    local: ['ollama', 'lm-studio', 'vllm', 'llama.cpp-server'],
+  },
+  capabilities: ['chat', 'tool-calling', 'streaming', 'json-mode', 'vision', 'embeddings'],
+  priorities: [
+    'RBAC interno',
+    'gestion de agentes y prompts',
+    'chat operativo',
+    'compatibilidad multi-modelo',
+    'soporte local y remoto',
+  ],
+  runtime: {
+    endpoints: ['GET /api/chat/executions', 'POST /api/chat/execute'],
+    adapters: ['ollama', 'openai-compatible'],
+  },
+};

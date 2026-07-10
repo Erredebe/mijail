@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProviderKind {
+  REMOTE
+  LOCAL
+}
+
+enum ModelCapability {
+  CHAT
+  TOOL_CALLING
+  STREAMING
+  JSON_MODE
+  VISION
+  EMBEDDINGS
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  userRoles    UserRole[]
+}
+
+model Role {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userRoles   UserRole[]
+}
+
+model UserRole {
+  userId     String
+  roleId     String
+  assignedAt DateTime @default(now())
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model ProviderConnection {
+  id            String            @id @default(cuid())
+  name          String
+  slug          String            @unique
+  provider      String
+  kind          ProviderKind
+  baseUrl       String?
+  apiKeyMasked  String?
+  isEnabled     Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  models        ModelDefinition[]
+  routingPolicy RoutingPolicy[]
+}
+
+model ModelDefinition {
+  id                   String               @id @default(cuid())
+  name                 String
+  slug                 String               @unique
+  externalModelId      String
+  capabilities         ModelCapability[]
+  contextWindow        Int?
+  supportsStructuredIo Boolean              @default(false)
+  isEnabled            Boolean              @default(true)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  providerConnectionId String
+  providerConnection   ProviderConnection   @relation(fields: [providerConnectionId], references: [id], onDelete: Cascade)
+  primaryPolicies      RoutingPolicy[]      @relation("PrimaryModel")
+  fallbackPolicies     RoutingPolicy[]      @relation("FallbackModel")
+
+  @@unique([providerConnectionId, externalModelId])
+}
+
+model RoutingPolicy {
+  id              String             @id @default(cuid())
+  name            String             @unique
+  isDefault       Boolean            @default(false)
+  environment     String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  providerId      String
+  primaryModelId  String
+  fallbackModelId String?
+  provider        ProviderConnection @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  primaryModel    ModelDefinition    @relation("PrimaryModel", fields: [primaryModelId], references: [id], onDelete: Restrict)
+  fallbackModel   ModelDefinition?   @relation("FallbackModel", fields: [fallbackModelId], references: [id], onDelete: SetNull)
+}

@@ -1,0 +1,14 @@
+{
+  "name": "agentic-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start:web": "npm --prefix apps/web run start",
+    "build:web": "npm --prefix apps/web run build",
+    "test:web": "npm --prefix apps/web run test",
+    "start:api": "npm --prefix apps/api run start:dev",
+    "build:api": "npm --prefix apps/api run build",
+    "test:api": "npm --prefix apps/api run test",
+    "build": "npm run build:web && npm run build:api"
+  }
+}

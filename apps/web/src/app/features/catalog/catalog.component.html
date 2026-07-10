@@ -1,0 +1,170 @@
+<section class="catalog-shell">
+  <div class="catalog-header">
+    <div>
+      <div class="eyebrow">Catalogo Vivo</div>
+      <h2>Providers, modelos y routing policies</h2>
+      <p>Panel operativo inicial para registrar conectores, modelos y reglas de routing.</p>
+    </div>
+
+    <a routerLink="/" class="back-link">Volver al dashboard</a>
+  </div>
+
+  <section class="admin-panel">
+    <article class="form-card auth-card">
+      <h3>JWT de operador</h3>
+      <p>Las operaciones de escritura requieren un token valido con rol `admin` o `builder`.</p>
+
+      <form [formGroup]="authForm">
+        <label>
+          <span>Bearer token</span>
+          <textarea formControlName="token" rows="3" placeholder="Pega aqui el accessToken"></textarea>
+        </label>
+      </form>
+    </article>
+
+    <article class="form-card">
+      <h3>Nuevo provider</h3>
+      <form [formGroup]="providerForm" (ngSubmit)="submitProvider()">
+        <label><span>Nombre</span><input formControlName="name" /></label>
+        <label><span>Slug</span><input formControlName="slug" /></label>
+        <label><span>Provider</span><input formControlName="provider" placeholder="openai, ollama..." /></label>
+        <label><span>Tipo</span>
+          <select formControlName="kind">
+            <option value="REMOTE">REMOTE</option>
+            <option value="LOCAL">LOCAL</option>
+          </select>
+        </label>
+        <label><span>Base URL</span><input formControlName="baseUrl" /></label>
+        <label><span>API key masked</span><input formControlName="apiKeyMasked" /></label>
+        <button type="submit" [disabled]="isSubmitting()">Crear provider</button>
+      </form>
+    </article>
+
+    <article class="form-card">
+      <h3>Nuevo modelo</h3>
+      <form [formGroup]="modelForm" (ngSubmit)="submitModel()">
+        <label><span>Nombre</span><input formControlName="name" /></label>
+        <label><span>Slug</span><input formControlName="slug" /></label>
+        <label><span>External model id</span><input formControlName="externalModelId" /></label>
+        <label><span>Provider</span>
+          <select formControlName="providerConnectionId">
+            @for (provider of providers(); track provider.id) {
+              <option [value]="provider.id">{{ provider.name }}</option>
+            }
+          </select>
+        </label>
+        <label><span>Capabilities</span><input formControlName="capabilities" placeholder="CHAT,STREAMING" /></label>
+        <label><span>Context window</span><input formControlName="contextWindow" type="number" /></label>
+        <label class="checkbox-row"><input formControlName="supportsStructuredIo" type="checkbox" /><span>Structured I/O</span></label>
+        <button type="submit" [disabled]="isSubmitting()">Crear modelo</button>
+      </form>
+    </article>
+
+    <article class="form-card">
+      <h3>Nueva routing policy</h3>
+      <form [formGroup]="routingPolicyForm" (ngSubmit)="submitRoutingPolicy()">
+        <label><span>Nombre</span><input formControlName="name" /></label>
+        <label><span>Entorno</span><input formControlName="environment" /></label>
+        <label><span>Provider</span>
+          <select formControlName="providerId" (change)="onRoutingProviderChange($any($event.target).value)">
+            @for (provider of providers(); track provider.id) {
+              <option [value]="provider.id">{{ provider.name }}</option>
+            }
+          </select>
+        </label>
+        <label><span>Modelo principal</span>
+          <select formControlName="primaryModelId">
+            @for (model of providerModels(routingPolicyForm.get('providerId')?.value || ''); track model.id) {
+              <option [value]="model.id">{{ model.name }}</option>
+            }
+          </select>
+        </label>
+        <label><span>Fallback</span>
+          <select formControlName="fallbackModelId">
+            <option value="">Sin fallback</option>
+            @for (model of providerModels(routingPolicyForm.get('providerId')?.value || ''); track model.id) {
+              <option [value]="model.id">{{ model.name }}</option>
+            }
+          </select>
+        </label>
+        <label class="checkbox-row"><input formControlName="isDefault" type="checkbox" /><span>Policy por defecto</span></label>
+        <button type="submit" [disabled]="isSubmitting()">Crear policy</button>
+      </form>
+    </article>
+  </section>
+
+  @if (actionSuccess()) {
+    <div class="status-banner success">{{ actionSuccess() }}</div>
+  }
+
+  @if (actionError()) {
+    <div class="status-banner error">{{ actionError() }}</div>
+  }
+
+  @if (loadError()) {
+    <div class="catalog-error">{{ loadError() }}</div>
+  }
+
+  <section class="policy-panel">
+    <div class="section-title-row">
+      <h3>Routing policies</h3>
+      <button type="button" class="ghost-button" (click)="reloadCatalog()">Recargar</button>
+    </div>
+
+    <div class="policy-grid">
+      @for (policy of routingPolicies(); track policy.id) {
+        <article class="policy-card">
+          <div class="provider-topline">
+            <span class="provider-kind">{{ policy.environment || 'global' }}</span>
+            <span class="provider-status">{{ policy.isDefault ? 'Default' : 'Custom' }}</span>
+          </div>
+
+          <h4>{{ policy.name }}</h4>
+          <p>{{ policy.provider?.name }} · {{ policy.primaryModel?.name }}</p>
+
+          @if (policy.fallbackModel) {
+            <p class="muted">Fallback: {{ policy.fallbackModel.name }}</p>
+          }
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="provider-grid">
+    @for (provider of providers(); track provider.id) {
+      <article class="provider-card">
+        <div class="provider-topline">
+          <span class="provider-kind">{{ provider.kind }}</span>
+          <span class="provider-status" [class.disabled]="!provider.isEnabled">
+            {{ provider.isEnabled ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+
+        <h3>{{ provider.name }}</h3>
+        <p class="provider-meta">{{ provider.provider }} · {{ provider.baseUrl || 'sin baseUrl' }}</p>
+
+        <div class="model-list">
+          @for (model of provider.models; track model.id) {
+            <div class="model-card">
+              <div class="model-name-row">
+                <strong>{{ model.name }}</strong>
+                <span>{{ model.externalModelId }}</span>
+              </div>
+
+              <div class="capability-row">
+                @for (capability of model.capabilities; track capability) {
+                  <span class="capability-pill">{{ capability }}</span>
+                }
+              </div>
+
+              <div class="model-flags">
+                <span>Ctx: {{ model.contextWindow || 'n/d' }}</span>
+                <span>{{ model.supportsStructuredIo ? 'Structured I/O' : 'Freeform' }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </article>
+    }
+  </section>
+</section>

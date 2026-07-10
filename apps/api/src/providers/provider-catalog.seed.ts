@@ -1,0 +1,56 @@
+import { ModelCapability, ProviderKind } from '@prisma/client';
+
+export const providerCatalogSeed = [
+  {
+    id: 'seed-openai',
+    name: 'OpenAI Production',
+    slug: 'openai-production',
+    provider: 'openai',
+    kind: ProviderKind.REMOTE,
+    baseUrl: 'https://api.openai.com/v1',
+    apiKeyMasked: 'sk-...prod',
+    isEnabled: true,
+    createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+    models: [
+      {
+        id: 'seed-gpt-4o',
+        name: 'GPT-4o',
+        slug: 'gpt-4o',
+        externalModelId: 'gpt-4o',
+        capabilities: [ModelCapability.CHAT, ModelCapability.TOOL_CALLING, ModelCapability.STREAMING, ModelCapability.JSON_MODE, ModelCapability.VISION],
+        contextWindow: 128000,
+        supportsStructuredIo: true,
+        isEnabled: true,
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+      },
+    ],
+  },
+  {
+    id: 'seed-ollama',
+    name: 'Ollama Local',
+    slug: 'ollama-local',
+    provider: 'ollama',
+    kind: ProviderKind.LOCAL,
+    baseUrl: 'http://localhost:11434',
+    apiKeyMasked: null,
+    isEnabled: true,
+    createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+    models: [
+      {
+        id: 'seed-llama3',
+        name: 'Llama 3',
+        slug: 'llama-3-local',
+        externalModelId: 'llama3',
+        capabilities: [ModelCapability.CHAT, ModelCapability.STREAMING],
+        contextWindow: 8192,
+        supportsStructuredIo: false,
+        isEnabled: true,
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+      },
+    ],
+  },
+];
