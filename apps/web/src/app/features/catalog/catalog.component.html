@@ -9,7 +9,225 @@
     <a routerLink="/" class="back-link">Volver al dashboard</a>
   </div>
 
-  <section class="admin-panel">
+  @if (actionSuccess()) {
+    <div class="status-banner success">{{ actionSuccess() }}</div>
+  }
+
+  @if (actionError()) {
+    <div class="status-banner error">{{ actionError() }}</div>
+  }
+
+  @if (loadError()) {
+    <div class="catalog-error">{{ loadError() }}</div>
+  }
+
+  <section class="policy-panel read-panel">
+    <div class="section-title-row">
+      <div>
+        <h3>Agents</h3>
+        <p>Asistentes activos, sus reglas de routing y capacidades conectadas.</p>
+      </div>
+    </div>
+
+    <div class="policy-grid">
+      @for (agent of agents(); track agent.id) {
+        <article class="policy-card">
+          <div class="provider-topline">
+            <span class="provider-kind">{{ agent.status }}</span>
+            <span class="provider-status" [class.disabled]="!agent.isEnabled">
+              {{ agent.isEnabled ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+
+          <h4>{{ agent.name }}</h4>
+          <p>{{ agent.slug }}</p>
+
+          @if (agent.description) {
+            <p class="muted">{{ agent.description }}</p>
+          }
+
+          @if (agent.routingPolicy) {
+            <p class="muted">Routing: {{ agent.routingPolicy.name }}</p>
+          }
+
+          @if (agent.skills?.length) {
+            <div class="tag-row">
+              @for (item of agent.skills; track item.skill.id) {
+                <span class="capability-pill">{{ item.skill.name }}</span>
+              }
+            </div>
+          }
+
+          @if (agent.tools?.length) {
+            <div class="tag-row">
+              @for (item of agent.tools; track item.tool.id) {
+                <span class="capability-pill alt-pill">{{ item.tool.name }}</span>
+              }
+            </div>
+          }
+
+          <div class="inline-actions">
+            <button type="button" class="ghost-button" (click)="editAgent(agent)">Editar</button>
+            <button type="button" class="ghost-button danger" (click)="deleteAgent(agent.id)">Eliminar</button>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="policy-panel read-panel">
+    <div class="section-title-row">
+      <div>
+        <h3>Skills</h3>
+        <p>Habilidades reutilizables que amplian el comportamiento de los agents.</p>
+      </div>
+    </div>
+
+    <div class="policy-grid">
+      @for (skill of skills(); track skill.id) {
+        <article class="policy-card">
+          <div class="provider-topline">
+            <span class="provider-kind">SKILL</span>
+            <span class="provider-status" [class.disabled]="!skill.isEnabled">
+              {{ skill.isEnabled ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+
+          <h4>{{ skill.name }}</h4>
+          <p>{{ skill.slug }}</p>
+
+          @if (skill.description) {
+            <p class="muted">{{ skill.description }}</p>
+          }
+
+          <div class="inline-actions">
+            <button type="button" class="ghost-button" (click)="editSkill(skill)">Editar</button>
+            <button type="button" class="ghost-button danger" (click)="deleteSkill(skill.id)">Eliminar</button>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="policy-panel read-panel">
+    <div class="section-title-row">
+      <div>
+        <h3>Tools</h3>
+        <p>Herramientas invocables y endpoints configurados para los agents.</p>
+      </div>
+    </div>
+
+    <div class="policy-grid">
+      @for (tool of tools(); track tool.id) {
+        <article class="policy-card">
+          <div class="provider-topline">
+            <span class="provider-kind">{{ tool.kind }}</span>
+            <span class="provider-status" [class.disabled]="!tool.isEnabled">
+              {{ tool.isEnabled ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+
+          <h4>{{ tool.name }}</h4>
+          <p>{{ tool.slug }}</p>
+
+          @if (tool.description) {
+            <p class="muted">{{ tool.description }}</p>
+          }
+
+          @if (tool.endpoint) {
+            <p class="muted">{{ tool.method || 'CALL' }} · {{ tool.endpoint }}</p>
+          }
+
+          <div class="inline-actions">
+            <button type="button" class="ghost-button" (click)="editTool(tool)">Editar</button>
+            <button type="button" class="ghost-button" (click)="executeTool(tool)">Ejecutar</button>
+            <button type="button" class="ghost-button danger" (click)="deleteTool(tool.id)">Eliminar</button>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="policy-panel read-panel providers-panel">
+    <div class="section-title-row">
+      <div>
+        <h3>Providers</h3>
+        <p>Conectores disponibles y modelos asociados para enrutar conversaciones.</p>
+      </div>
+      <button type="button" class="ghost-button" (click)="reloadCatalog()">Recargar</button>
+    </div>
+
+    <div class="provider-grid">
+      @for (provider of providers(); track provider.id) {
+      <article class="provider-card">
+        <div class="provider-topline">
+          <span class="provider-kind">{{ provider.kind }}</span>
+          <span class="provider-status" [class.disabled]="!provider.isEnabled">
+            {{ provider.isEnabled ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+
+        <h3>{{ provider.name }}</h3>
+        <p class="provider-meta">{{ provider.provider }} · {{ provider.baseUrl || 'sin baseUrl' }}</p>
+
+        <div class="model-list">
+          @for (model of provider.models; track model.id) {
+            <div class="model-card">
+              <div class="model-name-row">
+                <strong>{{ model.name }}</strong>
+                <span>{{ model.externalModelId }}</span>
+              </div>
+
+              <div class="capability-row">
+                @for (capability of model.capabilities; track capability) {
+                  <span class="capability-pill">{{ capability }}</span>
+                }
+              </div>
+
+              <div class="model-flags">
+                <span>Ctx: {{ model.contextWindow || 'n/d' }}</span>
+                <span>{{ model.supportsStructuredIo ? 'Structured I/O' : 'Freeform' }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </article>
+      }
+    </div>
+  </section>
+
+  <section class="policy-panel">
+    <div class="section-title-row">
+      <h3>Routing policies</h3>
+      <button type="button" class="ghost-button" (click)="reloadCatalog()">Recargar</button>
+    </div>
+
+    <div class="policy-grid">
+      @for (policy of routingPolicies(); track policy.id) {
+        <article class="policy-card">
+          <div class="provider-topline">
+            <span class="provider-kind">{{ policy.environment || 'global' }}</span>
+            <span class="provider-status">{{ policy.isDefault ? 'Default' : 'Custom' }}</span>
+          </div>
+
+          <h4>{{ policy.name }}</h4>
+          <p>{{ policy.provider?.name }} · {{ policy.primaryModel?.name }}</p>
+
+          @if (policy.fallbackModel) {
+            <p class="muted">Fallback: {{ policy.fallbackModel.name }}</p>
+          }
+        </article>
+      }
+    </div>
+  </section>
+
+  <details class="advanced-admin">
+    <summary>
+      <span>Administración avanzada</span>
+      <small>JWT, altas y edicion de providers, modelos, policies, agents, skills y tools.</small>
+    </summary>
+
+    <section class="admin-panel">
     <article class="form-card auth-card">
       <h3>JWT de operador</h3>
       <p>Las operaciones de escritura requieren un token valido con rol `admin` o `builder`.</p>
@@ -174,198 +392,7 @@
         <pre class="tool-result">{{ toolRunResult() }}</pre>
       }
     </article>
-  </section>
+    </section>
+  </details>
 
-  @if (actionSuccess()) {
-    <div class="status-banner success">{{ actionSuccess() }}</div>
-  }
-
-  @if (actionError()) {
-    <div class="status-banner error">{{ actionError() }}</div>
-  }
-
-  @if (loadError()) {
-    <div class="catalog-error">{{ loadError() }}</div>
-  }
-
-  <section class="policy-panel">
-    <div class="section-title-row">
-      <h3>Routing policies</h3>
-      <button type="button" class="ghost-button" (click)="reloadCatalog()">Recargar</button>
-    </div>
-
-    <div class="policy-grid">
-      @for (policy of routingPolicies(); track policy.id) {
-        <article class="policy-card">
-          <div class="provider-topline">
-            <span class="provider-kind">{{ policy.environment || 'global' }}</span>
-            <span class="provider-status">{{ policy.isDefault ? 'Default' : 'Custom' }}</span>
-          </div>
-
-          <h4>{{ policy.name }}</h4>
-          <p>{{ policy.provider?.name }} · {{ policy.primaryModel?.name }}</p>
-
-          @if (policy.fallbackModel) {
-            <p class="muted">Fallback: {{ policy.fallbackModel.name }}</p>
-          }
-        </article>
-      }
-    </div>
-  </section>
-
-  <section class="policy-panel">
-    <div class="section-title-row">
-      <h3>Agents</h3>
-    </div>
-
-    <div class="policy-grid">
-      @for (agent of agents(); track agent.id) {
-        <article class="policy-card">
-          <div class="provider-topline">
-            <span class="provider-kind">{{ agent.status }}</span>
-            <span class="provider-status" [class.disabled]="!agent.isEnabled">
-              {{ agent.isEnabled ? 'Activo' : 'Inactivo' }}
-            </span>
-          </div>
-
-          <h4>{{ agent.name }}</h4>
-          <p>{{ agent.slug }}</p>
-
-          @if (agent.description) {
-            <p class="muted">{{ agent.description }}</p>
-          }
-
-          @if (agent.routingPolicy) {
-            <p class="muted">Routing: {{ agent.routingPolicy.name }}</p>
-          }
-
-          @if (agent.skills?.length) {
-            <div class="tag-row">
-              @for (item of agent.skills; track item.skill.id) {
-                <span class="capability-pill">{{ item.skill.name }}</span>
-              }
-            </div>
-          }
-
-          @if (agent.tools?.length) {
-            <div class="tag-row">
-              @for (item of agent.tools; track item.tool.id) {
-                <span class="capability-pill alt-pill">{{ item.tool.name }}</span>
-              }
-            </div>
-          }
-
-          <div class="inline-actions">
-            <button type="button" class="ghost-button" (click)="editAgent(agent)">Editar</button>
-            <button type="button" class="ghost-button danger" (click)="deleteAgent(agent.id)">Eliminar</button>
-          </div>
-        </article>
-      }
-    </div>
-  </section>
-
-  <section class="policy-panel">
-    <div class="section-title-row">
-      <h3>Skills</h3>
-    </div>
-
-    <div class="policy-grid">
-      @for (skill of skills(); track skill.id) {
-        <article class="policy-card">
-          <div class="provider-topline">
-            <span class="provider-kind">SKILL</span>
-            <span class="provider-status" [class.disabled]="!skill.isEnabled">
-              {{ skill.isEnabled ? 'Activo' : 'Inactivo' }}
-            </span>
-          </div>
-
-          <h4>{{ skill.name }}</h4>
-          <p>{{ skill.slug }}</p>
-
-          @if (skill.description) {
-            <p class="muted">{{ skill.description }}</p>
-          }
-
-          <div class="inline-actions">
-            <button type="button" class="ghost-button" (click)="editSkill(skill)">Editar</button>
-            <button type="button" class="ghost-button danger" (click)="deleteSkill(skill.id)">Eliminar</button>
-          </div>
-        </article>
-      }
-    </div>
-  </section>
-
-  <section class="policy-panel">
-    <div class="section-title-row">
-      <h3>Tools</h3>
-    </div>
-
-    <div class="policy-grid">
-      @for (tool of tools(); track tool.id) {
-        <article class="policy-card">
-          <div class="provider-topline">
-            <span class="provider-kind">{{ tool.kind }}</span>
-            <span class="provider-status" [class.disabled]="!tool.isEnabled">
-              {{ tool.isEnabled ? 'Activo' : 'Inactivo' }}
-            </span>
-          </div>
-
-          <h4>{{ tool.name }}</h4>
-          <p>{{ tool.slug }}</p>
-
-          @if (tool.description) {
-            <p class="muted">{{ tool.description }}</p>
-          }
-
-          @if (tool.endpoint) {
-            <p class="muted">{{ tool.method || 'CALL' }} · {{ tool.endpoint }}</p>
-          }
-
-          <div class="inline-actions">
-            <button type="button" class="ghost-button" (click)="editTool(tool)">Editar</button>
-            <button type="button" class="ghost-button" (click)="executeTool(tool)">Ejecutar</button>
-            <button type="button" class="ghost-button danger" (click)="deleteTool(tool.id)">Eliminar</button>
-          </div>
-        </article>
-      }
-    </div>
-  </section>
-
-  <section class="provider-grid">
-    @for (provider of providers(); track provider.id) {
-      <article class="provider-card">
-        <div class="provider-topline">
-          <span class="provider-kind">{{ provider.kind }}</span>
-          <span class="provider-status" [class.disabled]="!provider.isEnabled">
-            {{ provider.isEnabled ? 'Activo' : 'Inactivo' }}
-          </span>
-        </div>
-
-        <h3>{{ provider.name }}</h3>
-        <p class="provider-meta">{{ provider.provider }} · {{ provider.baseUrl || 'sin baseUrl' }}</p>
-
-        <div class="model-list">
-          @for (model of provider.models; track model.id) {
-            <div class="model-card">
-              <div class="model-name-row">
-                <strong>{{ model.name }}</strong>
-                <span>{{ model.externalModelId }}</span>
-              </div>
-
-              <div class="capability-row">
-                @for (capability of model.capabilities; track capability) {
-                  <span class="capability-pill">{{ capability }}</span>
-                }
-              </div>
-
-              <div class="model-flags">
-                <span>Ctx: {{ model.contextWindow || 'n/d' }}</span>
-                <span>{{ model.supportsStructuredIo ? 'Structured I/O' : 'Freeform' }}</span>
-              </div>
-            </div>
-          }
-        </div>
-      </article>
-    }
-  </section>
 </section>
